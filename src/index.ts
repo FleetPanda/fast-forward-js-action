@@ -4,11 +4,16 @@ import { GitHubClientWrapper } from './github_client_wrapper';
 import { FastForwardAction } from './fast_forward_action';
 
 async function run(): Promise<void> {
+  const RESTRICTED_BRANCHES: string[] = ['master', 'main', 'uat'];
+  const NEEDS_RELEASE_APPROVAL_BRANCHES: string[] = ['master', 'main', 'uat', 'develop'];
+
   try {
     const github_token = core.getInput('GITHUB_TOKEN');
+    const github_pat_token = core.getInput('GITHUB_PAT_TOKEN');
     const octokit = github.getOctokit(github_token);
     const context = github.context;
     const client = new GitHubClientWrapper(github_token);
+    const client_pat = new GitHubClientWrapper(github_pat_token);
     const fastForward = new FastForwardAction(client);
 
     const success_message = core.getInput('success_message') || "Fast-forward Succeeded!";
@@ -44,11 +49,17 @@ async function run(): Promise<void> {
     });
 
     const base_branch = pull.data.base.ref;
-    const needs_release_approval = ['master', 'main', 'develop'].includes(base_branch);
+    const needs_release_approval = NEEDS_RELEASE_APPROVAL_BRANCHES.includes(base_branch);
+
+    if (RESTRICTED_BRANCHES.includes(base_branch) && pull.data.head.ref === base_branch) {
+      core.setFailed(`Fast-forward blocked on '${base_branch}' branch.`);
+      await fastForward.async_comment_on_pr(comment_messages, false, prod_branch, stage_branch, 'missing_approval');
+      return;
+    }
 
     if (needs_release_approval) {
       const approvers = await client.list_pull_request_approvers(pr_number);
-      const teamMembers = await client.list_team_members(owner, 'release-committee');
+      const teamMembers = await client_pat.list_team_members(owner, 'release-committee');
 
       const isApprovedByTeam = approvers.some(a => teamMembers.includes(a));
       core.info(`Base branch is '${base_branch}', which requires release-committee approval.`);
