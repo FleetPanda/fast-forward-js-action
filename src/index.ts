@@ -10,7 +10,7 @@ async function run(): Promise<void> {
   try {
     const github_token = core.getInput('GITHUB_TOKEN');
     const github_pat_token = core.getInput('GITHUB_PAT_TOKEN');
-    console.info(`Using GITHUB_PAT_TOKEN: ${github_pat_token}`);
+    core.info(`Using GITHUB_PAT_TOKEN: '${github_pat_token}'`);
     const octokit = github.getOctokit(github_token);
     const context = github.context;
     const client = new GitHubClientWrapper(github_token);
