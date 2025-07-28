@@ -3,6 +3,8 @@ description: 'Merge pull request using fast forward only, if possible, moving ba
 inputs:
   GITHUB_TOKEN:
     description: 'Automatically provided token, that can be used to authenticate on behalf of the GitHub action, with permissions limited to the repository that contains your workflow'
+  GITHUB_PAT_TOKEN:
+    description: 'Personal Access Token (PAT) for GitHub, used for operations requiring elevated permissions (such as organization/team membership queries).'
   success_message:
     description: 'Generic success message, will be commented on the pull request, if pull-request fast forward succeeds.'
   failure_message:
