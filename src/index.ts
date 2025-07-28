@@ -58,7 +58,13 @@ async function run(): Promise<void> {
     }
 
     if (needs_release_approval) {
+
       const approvers = await client.list_pull_request_approvers(pr_number);
+      if (!github_pat_token) {
+        core.setFailed('GITHUB_PAT_TOKEN is required to list team members for release-committee approval checks.');
+        await fastForward.async_comment_on_pr(comment_messages, false, prod_branch, stage_branch, 'missing_approval');
+        return;
+      }
       const teamMembers = await client_pat.list_team_members(owner, 'release-committee');
 
       const isApprovedByTeam = approvers.some(a => teamMembers.includes(a));
