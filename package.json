@@ -23,7 +23,7 @@
     "@actions/github": "^6.0.1",
     "@actions/http-client": ">=1.0.8",
     "@octokit/core": "^7.0.2",
-    "@octokit/rest": "^19.0.7"
+    "@octokit/rest": "^22.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.23",
